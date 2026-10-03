@@ -1,3 +1,7 @@
 allowBuilds:
   sharp: false
   unrs-resolver: false
+# baseline-browser-mapping (browser-support data used by Next.js tooling) ships very often; allow its
+# latest release so builds aren't blocked by the 24-hour minimum-release-age rule.
+minimumReleaseAgeExclude:
+  - baseline-browser-mapping
