@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><title>You're invited to BoonBaby Store Manager</title></head>
+  <body style="margin:0;padding:24px;background:#f5f7f7;font-family:Arial,Helvetica,sans-serif;color:#1f2a2a">
+    <table role="presentation" width="100%" style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:12px;padding:32px">
+      <tr><td>
+        <div style="display:inline-block;background:#2a8c86;color:#ffffff;font-weight:700;border-radius:8px;padding:6px 10px">BB</div>
+        <span style="font-weight:700;margin-left:8px">BoonBaby Store Manager</span>
+        <h1 style="font-size:20px;margin:24px 0 8px">You've been invited</h1>
+        <p style="font-size:15px;line-height:1.5;margin:0 0 24px">You have been added to your shop's BoonBaby Store Manager account. Choose a password to get started.</p>
+        <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=invite"
+           style="display:inline-block;background:#2a8c86;color:#ffffff;text-decoration:none;font-weight:700;border-radius:8px;padding:12px 20px">Accept invite</a>
+        <p style="font-size:12px;color:#5b6b6b;margin:24px 0 0">This link can be used once and expires in one hour. Sent to {{ .Email }}.</p>
+      </td></tr>
+    </table>
+  </body>
+</html>

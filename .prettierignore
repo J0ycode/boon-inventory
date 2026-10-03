@@ -1,0 +1,10 @@
+.next
+node_modules
+pnpm-lock.yaml
+supabase/.temp
+supabase/templates
+playwright-report
+test-results
+coverage
+next-env.d.ts
+*.sql

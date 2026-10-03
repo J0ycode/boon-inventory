@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Lint, typecheck, unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4 # version comes from "packageManager" in package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: cp .env.example .env.local
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm typecheck
+      - run: pnpm test
+
+  database-and-e2e:
+    name: Database tests, build, end-to-end
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: pnpm install --frozen-lockfile
+      # Local Supabase uses the same well-known development keys everywhere, so .env.example works as-is in CI.
+      - run: cp .env.example .env.local
+      - name: Start Supabase (applies migrations and seed)
+        run: supabase start -x studio,imgproxy,vector,logflare,realtime,postgres-meta
+      - name: Database lint
+        run: supabase db lint --level warning --fail-on error
+      - name: Database tests (pgTAP — RLS isolation and stock rules)
+        run: supabase test db
+      - name: Generated types are up to date
+        run: |
+          pnpm db:types
+          git diff --exit-code -- src/types/database.ts
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: End-to-end (phone, tablet, desktop)
+        run: pnpm e2e
+        env:
+          CI: "true"
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
