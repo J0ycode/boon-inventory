@@ -27,8 +27,9 @@ export async function signIn(
   const parsed = loginSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Enter your email and password." };
 
+  // On a shop's address the account must belong to that shop. On the main site any account may sign in and is
+  // sent to its own shop.
   const slug = await getTenantSlug();
-  if (!slug) return { ok: false, error: "Open your shop's address to sign in." };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
@@ -47,6 +48,7 @@ export async function signIn(
     await supabase.auth.signOut();
     return { ok: false, error: "This account is not linked to a shop, or it has been deactivated." };
   }
+  if (!slug) return { ok: true, redirectTo: tenantUrl(ctx.tenant.slug, portalHome(ctx.role)) };
   if (ctx.tenant.slug !== slug) {
     // Valid user, wrong shop address. Don't leak which shop they belong to.
     await supabase.auth.signOut();
